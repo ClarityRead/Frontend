@@ -1,96 +1,111 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-
-interface Paper {
-    id: number
-    title: string
-    authors: string[]
-    abstract: string
-    journal: string
-    year: number
-    doi: string
-    keywords: string[]
-    category: string
-}
-
-const dummyPapers: Paper[] = [
-    {
-        id: 1,
-        title: "Deep Learning Approaches for Natural Language Processing in Academic Text Analysis",
-        authors: ["Dr. Sarah Chen", "Prof. Michael Rodriguez", "Dr. Emily Watson"],
-        abstract: "This paper presents novel deep learning methodologies for analyzing academic texts, focusing on transformer-based architectures for improved understanding of complex scientific literature. Our approach achieves 94% accuracy in concept extraction and 89% in summarization tasks.",
-        journal: "Journal of Artificial Intelligence Research",
-        year: 2024,
-        doi: "10.1000/ai.2024.001",
-        keywords: ["Deep Learning", "NLP", "Academic Text", "Transformers"],
-        category: "Machine Learning"
-    },
-    {
-        id: 2,
-        title: "The Impact of AI-Assisted Learning on Student Comprehension in Higher Education",
-        authors: ["Dr. James Thompson", "Prof. Lisa Park", "Dr. Robert Kim"],
-        abstract: "We investigate how AI-powered tools affect student learning outcomes in university settings. Our longitudinal study of 2,500 students shows significant improvements in comprehension scores and reduced study time when using AI-assisted learning platforms.",
-        journal: "Educational Technology Review",
-        year: 2024,
-        doi: "10.1000/etr.2024.002",
-        keywords: ["AI Learning", "Education", "Student Outcomes", "Technology"],
-        category: "Education"
-    },
-    {
-        id: 3,
-        title: "Automated Citation Analysis and Research Impact Assessment Using Machine Learning",
-        authors: ["Dr. Maria Garcia", "Prof. David Lee", "Dr. Anna Smith"],
-        abstract: "This research introduces an automated system for analyzing citation patterns and assessing research impact. The system uses ensemble learning methods to predict paper influence and identify emerging research trends across multiple disciplines.",
-        journal: "Information Processing & Management",
-        year: 2023,
-        doi: "10.1000/ipm.2023.003",
-        keywords: ["Citation Analysis", "Research Impact", "Machine Learning", "Bibliometrics"],
-        category: "Information Science"
-    },
-    {
-        id: 4,
-        title: "Blockchain Technology in Academic Publishing: Ensuring Research Integrity and Transparency",
-        authors: ["Dr. Alex Johnson", "Prof. Sarah Wilson", "Dr. Mark Brown"],
-        abstract: "We propose a blockchain-based system for academic publishing that ensures research integrity, prevents plagiarism, and provides transparent peer review processes. The system has been tested with over 1,000 research papers across various disciplines.",
-        journal: "Nature Digital Innovation",
-        year: 2023,
-        doi: "10.1000/ndi.2023.004",
-        keywords: ["Blockchain", "Academic Publishing", "Research Integrity", "Transparency"],
-        category: "Computer Science"
-    },
-    {
-        id: 5,
-        title: "Cognitive Load Theory and Its Application in AI-Powered Educational Tools",
-        authors: ["Dr. Jennifer Davis", "Prof. Kevin Zhang", "Dr. Rachel Green"],
-        abstract: "This paper explores how cognitive load theory can be applied to design more effective AI-powered educational tools. We present a framework for optimizing information presentation and reducing cognitive overload in digital learning environments.",
-        journal: "Cognitive Science Quarterly",
-        year: 2024,
-        doi: "10.1000/csq.2024.005",
-        keywords: ["Cognitive Load", "AI Education", "Learning Design", "Human-Computer Interaction"],
-        category: "Psychology"
-    }
-]
+import { domains } from '../constants'
 
 function Papers() {
     const [searchTerm, setSearchTerm] = useState('')
-    const [selectedCategory, setSelectedCategory] = useState('All')
+    const [selectedDomain, setSelectedDomain] = useState('All')
+    const [selectedSubdomain, setSelectedSubdomain] = useState('All')
     const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [papers, setPapers] = useState<Paper[]>([])
+    const [filteredPapers, setFilteredPapers] = useState<Paper[]>([])
+    const [domainOptions, setDomainOptions] = useState<string[]>(['All'])
+    const [subdomainOptions, setSubdomainOptions] = useState<string[]>(['All'])
+    const [pagination, setPagination] = useState({
+        has_next: false,
+        has_previous: false,
+        page: 1,
+        page_size: 20,
+        total_count: 0,
+        total_pages: 0
+    })
+    const [currentPage, setCurrentPage] = useState(1)
+
+    const fetchPapers = async (search = '', domain = '', subdomain = '', page = 1) => {
+        try {
+            setLoading(true)
+            const params = new URLSearchParams()
+            if (search) params.append('search', search)
+            if (domain && domain !== 'All') params.append('domain', domain)
+            if (subdomain && subdomain !== 'All') params.append('subdomain', subdomain)
+            params.append('page', page.toString())
+
+            const results = await axios.get(`http://localhost:8000/api/papers/?${params.toString()}`)
+            console.log(results);
+            const papersData = results.data.results;
+            const paginationData = results.data.pagination;
+
+            // Ensure papersData is an array
+            const papersArray = Array.isArray(papersData) ? papersData : []
+
+            setPapers(papersArray)
+            setFilteredPapers(papersArray)
+            setPagination(paginationData)
+            setCurrentPage(page)
+
+            // Set domain options from constants
+            const allDomains = ['All', ...Object.keys(domains)]
+            setDomainOptions(allDomains)
+
+            // Set subdomain options based on selected domain
+            if (selectedDomain && selectedDomain !== 'All' && domains[selectedDomain]) {
+                const subdomains = ['All', ...domains[selectedDomain]]
+                setSubdomainOptions(subdomains)
+            } else {
+                setSubdomainOptions(['All'])
+            }
+        } catch (e) {
+            console.log('Error fetching papers:', e)
+            // Set empty arrays on error
+            setPapers([])
+            setFilteredPapers([])
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/papers/').then((response: any) => {
-            console.log(response)
-        })
+        fetchPapers()
     }, [])
 
-    const categories = ['All', ...Array.from(new Set(dummyPapers.map(paper => paper.category)))]
+    // Debounced search effect
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setCurrentPage(1) // Reset to first page when searching
+            fetchPapers(searchTerm, selectedDomain, selectedSubdomain, 1)
+        }, 500) // 500ms delay
 
-    const filteredPapers = dummyPapers.filter(paper => {
-        const matchesSearch = paper.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            paper.abstract.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            paper.authors.some(author => author.toLowerCase().includes(searchTerm.toLowerCase()))
-        const matchesCategory = selectedCategory === 'All' || paper.category === selectedCategory
-        return matchesSearch && matchesCategory
-    })
+        return () => clearTimeout(timeoutId)
+    }, [searchTerm, selectedDomain, selectedSubdomain])
+
+    // Handle page changes
+    const handlePageChange = (page: number) => {
+        fetchPapers(searchTerm, selectedDomain, selectedSubdomain, page)
+    }
+
+    // Update subdomain options when domain changes
+    useEffect(() => {
+        if (selectedDomain && selectedDomain !== 'All' && domains[selectedDomain]) {
+            const subdomains = ['All', ...domains[selectedDomain]]
+            setSubdomainOptions(subdomains)
+            setSelectedSubdomain('All') // Reset subdomain when domain changes
+        } else {
+            setSubdomainOptions(['All'])
+            setSelectedSubdomain('All')
+        }
+    }, [selectedDomain])
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading papers...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -116,7 +131,7 @@ function Papers() {
                         <div className="flex-1">
                             <input
                                 type="text"
-                                placeholder="Search papers by title, author, or content..."
+                                placeholder="Search papers by title, author, or summary..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -124,12 +139,24 @@ function Papers() {
                         </div>
                         <div className="md:w-48">
                             <select
-                                value={selectedCategory}
-                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                value={selectedDomain}
+                                onChange={(e) => setSelectedDomain(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             >
-                                {categories.map(category => (
-                                    <option key={category} value={category}>{category}</option>
+                                {domainOptions.map(domain => (
+                                    <option key={domain} value={domain}>{domain}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="md:w-48">
+                            <select
+                                value={selectedSubdomain}
+                                onChange={(e) => setSelectedSubdomain(e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                disabled={selectedDomain === 'All'}
+                            >
+                                {subdomainOptions.map(subdomain => (
+                                    <option key={subdomain} value={subdomain}>{subdomain}</option>
                                 ))}
                             </select>
                         </div>
@@ -138,37 +165,55 @@ function Papers() {
 
                 {/* Papers Grid */}
                 <div className="grid gap-6">
-                    {filteredPapers.map(paper => (
-                        <div key={paper.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6">
+                    {filteredPapers && filteredPapers.length > 0 ? filteredPapers.map(paper => (
+                        <div key={paper.paper_id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex-1">
                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{paper.title}</h3>
                                     <p className="text-gray-600 mb-2">
-                                        <span className="font-medium">Authors:</span> {paper.authors.join(', ')}
+                                        <span className="font-medium">Author:</span> {paper.author}
                                     </p>
                                     <p className="text-gray-600 mb-2">
-                                        <span className="font-medium">Journal:</span> {paper.journal} ({paper.year})
+                                        <span className="font-medium">Published:</span> {paper.published}
                                     </p>
                                 </div>
-                                <div className="ml-4">
+                                <div className="ml-4 flex flex-col gap-2">
                                     <span className="inline-block bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">
-                                        {paper.category}
+                                        {paper.domain}
                                     </span>
+                                    {paper.subdomain && (
+                                        <span className="inline-block bg-gray-100 text-gray-700 text-sm font-medium px-3 py-1 rounded-full">
+                                            {paper.subdomain}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
-                            <p className="text-gray-700 mb-4 leading-relaxed">{paper.abstract}</p>
-
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                {paper.keywords.map(keyword => (
-                                    <span key={keyword} className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded">
-                                        {keyword}
-                                    </span>
-                                ))}
-                            </div>
+                            <p className="text-gray-700 mb-4 leading-relaxed">{paper.summary}</p>
 
                             <div className="flex justify-between items-center">
-                                <p className="text-sm text-gray-500">DOI: {paper.doi}</p>
+                                <div className="flex gap-4">
+                                    {paper.pdf_link && (
+                                        <a
+                                            href={paper.pdf_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                                        >
+                                            View PDF
+                                        </a>
+                                    )}
+                                    {paper.reference_link && (
+                                        <a
+                                            href={paper.reference_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                                        >
+                                            Reference
+                                        </a>
+                                    )}
+                                </div>
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setSelectedPaper(paper)}
@@ -182,12 +227,67 @@ function Papers() {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                    )) : null}
                 </div>
 
-                {filteredPapers.length === 0 && (
+                {filteredPapers && filteredPapers.length === 0 && !loading && (
                     <div className="text-center py-12">
                         <p className="text-gray-500 text-lg">No papers found matching your search criteria.</p>
+                    </div>
+                )}
+
+                {/* Pagination */}
+                {pagination.total_pages > 1 && (
+                    <div className="mt-8 flex items-center justify-between">
+                        <div className="text-sm text-gray-700">
+                            Showing {((currentPage - 1) * pagination.page_size) + 1} to {Math.min(currentPage * pagination.page_size, pagination.total_count)} of {pagination.total_count} results
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={!pagination.has_previous}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Previous
+                            </button>
+
+                            {/* Page numbers */}
+                            <div className="flex space-x-1">
+                                {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
+                                    let pageNum;
+                                    if (pagination.total_pages <= 5) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage <= 3) {
+                                        pageNum = i + 1;
+                                    } else if (currentPage >= pagination.total_pages - 2) {
+                                        pageNum = pagination.total_pages - 4 + i;
+                                    } else {
+                                        pageNum = currentPage - 2 + i;
+                                    }
+
+                                    return (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => handlePageChange(pageNum)}
+                                            className={`px-3 py-2 text-sm font-medium rounded-md ${currentPage === pageNum
+                                                ? 'bg-indigo-600 text-white'
+                                                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={!pagination.has_next}
+                                className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Next
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
@@ -211,36 +311,41 @@ function Papers() {
 
                             <div className="mb-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedPaper.title}</h3>
-                                <p className="text-gray-600">by {selectedPaper.authors.join(', ')}</p>
+                                <p className="text-gray-600">by {selectedPaper.author}</p>
+                                <p className="text-sm text-gray-500 mt-1">{selectedPaper.domain} • {selectedPaper.published}</p>
                             </div>
 
                             <div className="space-y-6">
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-2">AI Summary</h4>
                                     <p className="text-gray-700 bg-blue-50 p-4 rounded-lg">
-                                        This paper presents innovative research in {selectedPaper.category.toLowerCase()}, focusing on {selectedPaper.keywords[0].toLowerCase()}.
-                                        The authors demonstrate significant contributions to the field with practical applications and measurable results.
-                                        The methodology shows promise for future research and real-world implementation.
+                                        This paper presents research in {selectedPaper.domain.toLowerCase()},
+                                        {selectedPaper.subdomain && ` specifically in ${selectedPaper.subdomain.toLowerCase()},`}
+                                        published in {selectedPaper.published}. The research contributes to the field with
+                                        practical insights and findings that could be valuable for further study and application.
                                     </p>
                                 </div>
 
                                 <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Key Concepts</h4>
+                                    <h4 className="font-semibold text-gray-900 mb-2">Research Domain</h4>
                                     <div className="flex flex-wrap gap-2">
-                                        {selectedPaper.keywords.map(keyword => (
-                                            <span key={keyword} className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
-                                                {keyword}
+                                        <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
+                                            {selectedPaper.domain}
+                                        </span>
+                                        {selectedPaper.subdomain && (
+                                            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                                                {selectedPaper.subdomain}
                                             </span>
-                                        ))}
+                                        )}
                                     </div>
                                 </div>
 
                                 <div>
                                     <h4 className="font-semibold text-gray-900 mb-2">Research Impact</h4>
                                     <p className="text-gray-700">
-                                        This research contributes to the growing body of knowledge in {selectedPaper.category.toLowerCase()} and has potential applications
-                                        in educational technology, research methodology, and academic publishing. The findings could influence future studies and
-                                        practical implementations in the field.
+                                        This research contributes to the growing body of knowledge in {selectedPaper.domain.toLowerCase()}
+                                        and has potential applications in academic research, educational technology, and practical implementations.
+                                        The findings could influence future studies and real-world applications in the field.
                                     </p>
                                 </div>
                             </div>
