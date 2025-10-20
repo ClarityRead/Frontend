@@ -1,47 +1,54 @@
 import './App.css'
-import { useState, useEffect } from 'react'
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Outlet,
+} from "react-router";
 import Introduction from './pages/Introduction'
 import Papers from './pages/Papers'
+import Signup from './pages/Signup'
+import Login from './pages/Login'
+import Navbar from './components/navbar'
+
+// Layout component that includes the navbar
+function Layout() {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  )
+}
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('introduction')
-
-  useEffect(() => {
-    const handleRouteChange = () => {
-      const path = window.location.pathname
-      if (path === '/papers') {
-        setCurrentPage('papers')
-      } else {
-        setCurrentPage('introduction')
-      }
-    }
-
-    // Listen for route changes
-    window.addEventListener('popstate', handleRouteChange)
-    handleRouteChange() // Check initial route
-
-    return () => window.removeEventListener('popstate', handleRouteChange)
-  }, [])
-
-  // Override window.location.href to use our routing
-  const navigate = (path: string) => {
-    window.history.pushState({}, '', path)
-    if (path === '/papers') {
-      setCurrentPage('papers')
-    } else {
-      setCurrentPage('introduction')
-    }
-  }
-
-  // Make navigate available globally
-  useEffect(() => {
-    (window as any).navigate = navigate
-  }, [])
+  let router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          path: "/",
+          Component: Introduction,
+        },
+        {
+          path: "/papers",
+          Component: Papers,
+        },
+        {
+          path: "/signup",
+          Component: Signup,
+        },
+        {
+          path: "/login",
+          Component: Login,
+        },
+      ],
+    },
+  ]);
 
   return (
     <>
-      {currentPage === 'introduction' && <Introduction />}
-      {currentPage === 'papers' && <Papers />}
+      <RouterProvider router={router} />
     </>
   )
 }

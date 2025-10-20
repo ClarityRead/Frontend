@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Introduction() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -15,12 +17,11 @@ function Introduction() {
                         Make research accessible, learning efficient, and knowledge discovery effortless.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button
-                            onClick={() => (window as any).navigate('/papers')}
+                        <Link to="/papers"><button
                             className="bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700 transition-colors"
                         >
                             Browse Papers
-                        </button>
+                        </button></Link>
                         <button className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-indigo-50 transition-colors">
                             Learn More
                         </button>
