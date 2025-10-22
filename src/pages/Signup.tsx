@@ -104,7 +104,7 @@ function Signup() {
                         Create your account
                     </h2>
                     <p className="text-gray-600">
-                        Join SoDA and start transforming your academic research
+                        Join ClarityRead and start transforming your academic research
                     </p>
                 </div>
 

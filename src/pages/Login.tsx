@@ -37,7 +37,7 @@ function Login() {
                         Welcome back
                     </h2>
                     <p className="text-gray-600">
-                        Sign in to your SoDA account to continue
+                        Sign in to your ClarityRead account to continue
                     </p>
                 </div>
 

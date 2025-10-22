@@ -7,7 +7,7 @@ function Introduction() {
             <div className="container mx-auto px-6 py-16">
                 <div className="text-center max-w-4xl mx-auto">
                     <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                        SoDA
+                        ClarityRead
                         <span className="block text-3xl md:text-4xl text-indigo-600 mt-2">
                             Student Document Assistant
                         </span>
@@ -33,7 +33,7 @@ function Introduction() {
             <div className="bg-white py-16">
                 <div className="container mx-auto px-6">
                     <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                        How SoDA Helps Students
+                        How ClarityRead Helps Students
                     </h2>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         {/* Feature 1 */}
@@ -113,7 +113,7 @@ function Introduction() {
                         Ready to Transform Your Learning?
                     </h2>
                     <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-                        Join thousands of students who are already using SoDA to make academic research more accessible and understandable.
+                        Join thousands of students who are already using ClarityRead to make academic research more accessible and understandable.
                     </p>
                     <button
                         onClick={() => (window as any).navigate('/papers')}
@@ -128,7 +128,7 @@ function Introduction() {
             <div className="bg-gray-900 text-white py-8">
                 <div className="container mx-auto px-6 text-center">
                     <p className="text-gray-400">
-                        © 2024 SoDA - Student Document Assistant. Empowering students with AI-powered academic insights.
+                        © 2024 ClarityRead - Student Document Assistant. Empowering students with AI-powered academic insights.
                     </p>
                 </div>
             </div>
