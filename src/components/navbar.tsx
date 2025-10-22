@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from '../contexts/auth'
 
 function Navbar() {
+    const { user, logout } = useAuth();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const toggleMobileMenu = () => {
@@ -46,7 +48,12 @@ function Navbar() {
                     {/* Auth Buttons */}
                     <div className="hidden md:block">
                         <div className="ml-4 flex items-center md:ml-6">
-                            <Link
+                            {(Object.keys(user).length != 0) ? <button
+                                onClick={logout}
+                                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                            >
+                                Logout
+                            </button> : <><Link
                                 to="/login"
                                 className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                             >
@@ -57,7 +64,7 @@ function Navbar() {
                                 className="ml-3 bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
                             >
                                 Sign Up
-                            </Link>
+                            </Link></>}
                         </div>
                     </div>
 

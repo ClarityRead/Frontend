@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from 'axios'
+import { useAuth } from '../contexts/auth'
 
 function Signup() {
+    const { signup, isLoading, errors, setErrors, setIsLoading } = useAuth();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -81,10 +81,7 @@ function Signup() {
         setIsLoading(true);
 
         try {
-            // Simulate API call
-            const result = await axios.post(`http://localhost:8000/api/auth/signup?`, {username, password, email});
-            // Handle successful signup here
-            alert('Account created successfully!');
+            signup(formData);
         } catch (error) {
             console.error('Signup error:', error);
             alert('An error occurred. Please try again.');

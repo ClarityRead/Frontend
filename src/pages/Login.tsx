@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from '../contexts/auth'
 
 function Login() {
+    const { login, isLoading, errors } = useAuth();
+
     const [formData, setFormData] = useState({
-        usernameOrEmail: '',
+        username: '',
         password: ''
     });
-    const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -15,54 +16,12 @@ function Login() {
             ...prev,
             [name]: value
         }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
     };
 
-    const validateForm = () => {
-        const newErrors: { [key: string]: string } = {};
-
-        // Username or Email validation
-        if (!formData.usernameOrEmail.trim()) {
-            newErrors.usernameOrEmail = 'Username or email is required';
-        }
-
-        // Password validation
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        setIsLoading(true);
-
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            console.log('Login data:', formData);
-            // Handle successful login here
-            alert('Login successful!');
-        } catch (error) {
-            console.error('Login error:', error);
-            alert('Invalid credentials. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        login(formData);
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -87,22 +46,19 @@ function Login() {
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {/* Username or Email Field */}
                         <div>
-                            <label htmlFor="usernameOrEmail" className="text-left block text-sm font-medium text-gray-700 mb-2">
-                                Username or Email
+                            <label htmlFor="username" className="text-left block text-sm font-medium text-gray-700 mb-2">
+                                Username
                             </label>
                             <input
-                                id="usernameOrEmail"
-                                name="usernameOrEmail"
+                                id="username"
+                                name="username"
                                 type="text"
-                                value={formData.usernameOrEmail}
+                                value={formData.username}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.usernameOrEmail ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
                                     }`}
                                 placeholder="Enter your username or email"
                             />
-                            {errors.usernameOrEmail && (
-                                <p className="mt-1 text-sm text-red-600">{errors.usernameOrEmail}</p>
-                            )}
                         </div>
 
                         {/* Password Field */}
@@ -120,9 +76,6 @@ function Login() {
                                     }`}
                                 placeholder="Enter your password"
                             />
-                            {errors.password && (
-                                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                            )}
                         </div>
 
                         {/* Remember Me & Forgot Password */}

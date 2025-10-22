@@ -9,13 +9,18 @@ import Papers from './pages/Papers'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Navbar from './components/navbar'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider } from './contexts/auth'
 
 // Layout component that includes the navbar
 function Layout() {
   return (
     <>
+      <AuthProvider>
       <Navbar />
       <Outlet />
+      <Toaster />
+      </AuthProvider>
     </>
   )
 }

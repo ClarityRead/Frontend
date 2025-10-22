@@ -9,3 +9,20 @@ interface Paper {
     summary : string 
     title : string
 }
+
+interface User {
+    username: string
+    _id: string 
+}
+
+interface AuthContextType {
+    user: User | null,
+    token: string | null,
+    isLoading: boolean,
+    signup: () => Promise<void>,
+    login: () => Promise<void>,
+    logout: () => Promise<void>,
+    errors: {},
+    setErrors: () => void,
+    setIsLoading: () => void,
+}
