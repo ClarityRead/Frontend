@@ -6,6 +6,7 @@ import {
 } from "react-router";
 import Introduction from './pages/Introduction'
 import Papers from './pages/Papers'
+import Paper from './pages/Paper'
 import Signup from './pages/Signup'
 import Login from './pages/Login'
 import Navbar from './components/navbar'
@@ -38,6 +39,10 @@ function App() {
         {
           path: "/papers",
           Component: Papers,
+        },
+        {
+          path: "/papers/:id",
+          Component: Paper,
         },
         {
           path: "/signup",

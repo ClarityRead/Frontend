@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { domains } from '../constants'
+import { Link } from "react-router-dom";
 
 function Papers() {
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedDomain, setSelectedDomain] = useState('All')
     const [selectedSubdomain, setSelectedSubdomain] = useState('All')
-    const [selectedPaper, setSelectedPaper] = useState<Paper | null>(null)
     const [loading, setLoading] = useState(true)
     const [papers, setPapers] = useState<Paper[]>([])
     const [filteredPapers, setFilteredPapers] = useState<Paper[]>([])
@@ -215,15 +215,12 @@ function Papers() {
                                     )}
                                 </div>
                                 <div className="flex gap-2">
+                                    <Link to={`/papers/${paper.id}`}> 
                                     <button
-                                        onClick={() => setSelectedPaper(paper)}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                                    >
-                                        Analyze with AI
-                                    </button>
-                                    <button className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                        className="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
                                         View Details
                                     </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -291,80 +288,6 @@ function Papers() {
                     </div>
                 )}
             </div>
-
-            {/* Paper Analysis Modal */}
-            {selectedPaper && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <h2 className="text-2xl font-bold text-gray-900">AI Analysis</h2>
-                                <button
-                                    onClick={() => setSelectedPaper(null)}
-                                    className="text-gray-400 hover:text-gray-600"
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">{selectedPaper.title}</h3>
-                                <p className="text-gray-600">by {selectedPaper.author}</p>
-                                <p className="text-sm text-gray-500 mt-1">{selectedPaper.domain} • {selectedPaper.published}</p>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">AI Summary</h4>
-                                    <p className="text-gray-700 bg-blue-50 p-4 rounded-lg">
-                                        This paper presents research in {selectedPaper.domain.toLowerCase()},
-                                        {selectedPaper.subdomain && ` specifically in ${selectedPaper.subdomain.toLowerCase()},`}
-                                        published in {selectedPaper.published}. The research contributes to the field with
-                                        practical insights and findings that could be valuable for further study and application.
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Research Domain</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm">
-                                            {selectedPaper.domain}
-                                        </span>
-                                        {selectedPaper.subdomain && (
-                                            <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                                                {selectedPaper.subdomain}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Research Impact</h4>
-                                    <p className="text-gray-700">
-                                        This research contributes to the growing body of knowledge in {selectedPaper.domain.toLowerCase()}
-                                        and has potential applications in academic research, educational technology, and practical implementations.
-                                        The findings could influence future studies and real-world applications in the field.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-end gap-3">
-                                <button
-                                    onClick={() => setSelectedPaper(null)}
-                                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                                >
-                                    Close
-                                </button>
-                                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                                    Ask Questions
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

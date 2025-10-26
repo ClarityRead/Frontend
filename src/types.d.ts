@@ -1,4 +1,5 @@
 interface Paper {
+    id: string 
     paper_id: string
     author: string
     domain: string 

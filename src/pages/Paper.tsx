@@ -1,8 +1,24 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
-import { domains } from '../constants'
+import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { toast } from "react-hot-toast";
+import { apiClient } from '../lib/apiclient'
 
 function Paper() {
+    const {id} = useParams();
+    const [paperData, setPaperData] = useState();
+
+    const GetPaper = async () => {
+        try {
+            const result = await apiClient.get(`api/papers/${id}`);
+            setPaperData(result.data);
+        } catch (error : any) {
+            toast.error(error.response.data.error);    
+        }
+    }
+    useEffect(() => {
+        GetPaper();
+    }, []);
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
@@ -16,3 +32,5 @@ function Paper() {
         </div>
     )
 }
+
+export default Paper 
