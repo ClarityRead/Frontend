@@ -21,29 +21,28 @@ function Navbar() {
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
                             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                                <span className="text-white font-bold text-lg">S</span>
+                                <span className="text-white font-bold text-lg">CR</span>
                             </div>
                             <span className="text-xl font-bold text-gray-900">ClarityRead</span>
                         </Link>
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-4">
-                            <Link
-                                to="/"
-                                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                            >
-                                Home
-                            </Link>
-                            <Link
-                                to="/papers"
-                                className="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                            >
-                                Papers
-                            </Link>
-                        </div>
+                    <div className="hidden md:flex h-16 items-center space-x-8 mr-4">
+                    <Link
+                        to="/"
+                        className="text-gray-700 hover:text-indigo-600 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                    >
+                        Home
+                    </Link>
+                    <Link
+                        to="/papers"
+                        className="text-gray-700 hover:text-indigo-600 px-3 py-1 rounded-md text-sm font-medium transition-colors"
+                    >
+                        Papers
+                    </Link>
                     </div>
+
 
                     {/* Auth Buttons */}
                     <div className="hidden md:block">
