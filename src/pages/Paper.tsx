@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { toast } from "react-hot-toast";
 import { apiClient } from '../lib/apiclient'
 import ReactMarkdown from 'react-markdown';
+import PdfViewer from '../components/PdfViewer';
 
 function Paper() {
     const { id } = useParams();
@@ -132,6 +133,8 @@ function Paper() {
                     </p>
                 </div>
             </div>
+
+            <PdfViewer url={`${paperData ? paperData.pdf_link : ""}`}></PdfViewer>
 
             {/* AI Summary */}
             {aiSummary && (
