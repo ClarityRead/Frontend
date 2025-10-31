@@ -20,9 +20,7 @@ function Navbar() {
                     {/* Logo/Brand */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
-                            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                                <span className="text-white font-bold text-lg">CR</span>
-                            </div>
+                            <img src="/public/paper.png" width="60" height="60"></img>
                             <span className="text-xl font-bold text-gray-900">ClarityRead</span>
                         </Link>
                     </div>

@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext<AuthContextType>({user: null,
     token: null,
@@ -10,13 +11,21 @@ const AuthContext = createContext<AuthContextType>({user: null,
     login: async () => {},
     logout: async () => {},
     isLoading: false,
-    errors: {}});
+    errors: {},
+  });
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({});
   const [token, setToken] = useState(localStorage.getItem("access_token") || null);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const isAuthenticated = () => {
+    const token = localStorage.getItem("access_token");
+
+    return token ? true : false;
+  }
 
   // Decode JWT payload (base64)
   const parseJwt = (token) => {
@@ -68,6 +77,7 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser({username});
       toast.success("Login successful!");
+      navigate('/papers');
     } catch (error : any) {
       console.error("Login error:", error);
       toast.error(error.response.data.error);
@@ -86,6 +96,7 @@ export const AuthProvider = ({ children }) => {
       const result = await axios.post(`http://localhost:8000/api/auth/signup?`, {username, password, email});
       localStorage.setItem("token", result.data.access_token);
       toast.success("Signup successful!");
+      navigate('/papers');
     } catch (error : any) {
       console.error("Signup error:", error);
       toast.error(error.response.data.error);
@@ -101,6 +112,7 @@ export const AuthProvider = ({ children }) => {
     setUser({});
     localStorage.removeItem("access_token");
     toast("Logged out");
+    navigate('/');
   };
 
   // Axios instance with token attached
@@ -127,6 +139,7 @@ export const AuthProvider = ({ children }) => {
         setErrors,
         setIsLoading,
         errors,
+        isAuthenticated,
       }}
     >
       {children}

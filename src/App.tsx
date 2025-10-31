@@ -3,7 +3,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
-} from "react-router";
+} from "react-router-dom"; 
 import Introduction from './pages/Introduction'
 import Papers from './pages/Papers'
 import Paper from './pages/Paper'
@@ -12,55 +12,53 @@ import Login from './pages/Login'
 import Navbar from './components/navbar'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './contexts/auth'
+import ProtectedRoute from './wrappers/protected_route'
 
-// Layout component that includes the navbar
 function Layout() {
   return (
-    <>
-      <AuthProvider>
+    <AuthProvider>
       <Navbar />
       <Outlet />
       <Toaster />
-      </AuthProvider>
-    </>
+    </AuthProvider>
   )
 }
 
 function App() {
-  let router = createBrowserRouter([
+  const router = createBrowserRouter([
     {
       path: "/",
       element: <Layout />,
       children: [
         {
-          path: "/",
-          Component: Introduction,
+          index: true,
+          element: <Introduction />,
         },
         {
-          path: "/papers",
-          Component: Papers,
+          path: "papers",
+          element: <Papers />,
         },
         {
-          path: "/papers/:id",
-          Component: Paper,
+          path: "papers/:id",
+          element: (
+            <ProtectedRoute>
+              <Paper />
+            </ProtectedRoute>
+          ),
         },
         {
-          path: "/signup",
-          Component: Signup,
+          path: "signup",
+          element: <Signup />,
         },
         {
-          path: "/login",
-          Component: Login,
+          path: "login",
+          element: <Login />,
         },
       ],
     },
   ]);
 
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  )
+  return <RouterProvider router={router} />;
 }
 
-export default App
+export default App;

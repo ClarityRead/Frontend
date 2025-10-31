@@ -26,4 +26,5 @@ interface AuthContextType {
     errors: {},
     setErrors: () => void,
     setIsLoading: () => void,
+    isAuthenticated: () => boolean,
 }
